@@ -16,14 +16,19 @@ controller.index =  async(req, res) => {
         console.log("UsersDb" + UsersDb)
         res.send(UsersDb)
     }     
- }
+
+    // CORRECTIF de l'exo
+    // utiliser findandCountAll pour avoir le nombre total d'éléments
+    // et le nombre de pages à afficher sans tout requêter
+
+}
     
 controller.search = async(req, res) => {
     const name = req.params.name
     console.log("name" +name)
     console.log("name" + name.toUpperCase())
     
-    const User = await UserDb.findAll({where : {name : name}})
+    const User = await UserDb.findAll({where : {name : `%${name}%`}})
     
     console.log("user" + User)
     //Users.filter(user => user.name.toLocaleUpperCase().includes(name.toUpperCase()) ) 
@@ -34,8 +39,8 @@ controller.search = async(req, res) => {
 controller.show = async(req, res) => {
     const id = req.params.id
     console.log("id" +id)
-    const user = await UserDb.findOne({where : {id : id}})
-    if (user) { res.send(user)}
+    const user = await UserDb.findByPk(parseInt(id))
+    if (user) { res.json(user)}
     else {res.status(404).json({message: "User not found"})}
 
 

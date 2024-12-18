@@ -14,4 +14,4 @@ const UserDb = db.define('UserDB', {
 
 
 
-  module.exports = {UserDb}
+ module.exports = {UserDb}
