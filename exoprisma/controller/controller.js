@@ -6,16 +6,14 @@ controller.index =  async(req, res) => {
     const {page,limit} = req.query
     console.log("page" + page + "limit" + limit)
     console.log("page" + parseInt(limit) + "limit" + parseInt(page))
-    let UsersDb = await UserDb.find()
+
 
 
     if (parseInt(limit) >0 && parseInt(page) >0) {
-        nbPages = Math.floor(UsersDb.length/limit)
-        const UsersPage = UsersDb.slice((page-1)*limit, page*limit)
-        res.send(UsersPage)
+        res.send(await UserDb.findMany({skip : (parseInt(page)-1)*parseInt(limit), take : parseInt(limit)}))
     } else {  
         console.log("UsersDb" + UsersDb)
-        res.send(UsersDb)
+        res.send(await UserDb.findMany())
     }     
  }
     
@@ -24,7 +22,12 @@ controller.search = async(req, res) => {
     console.log("name" +name)
     console.log("name" + name.toUpperCase())
     
-    const User = await UserDb.find({name : `%${name}%`})
+    const User = await UserDb.findMany({
+        where: {
+            name: { contains: name }
+        }
+    });
+    
     
     console.log("user" + User)
     res.send(User)
@@ -32,9 +35,13 @@ controller.search = async(req, res) => {
 }
 
 controller.show = (req, res) => {
-       const id =req.params.id
-  
-    const user= UserDb.findById(id).then (user => res.json(user)).catch(err => res.status(404).json({message: "User not found"}))
+    const id =parseInt(req.params.id)
+    console.log("id" +id)
+    const user= UserDb.findUnique({
+        where: {    id: id
+        }})
+        .then (user => res.json(user))
+        .catch(err => res.status(404).json({message: "User not found"}))
 
 }
 
@@ -55,7 +62,10 @@ controller.create = (req, res) => {
     
     if (name.length !=0 && Number.isInteger(age) && age > 0) { 
     
-        UserDb.create({name, age})
+        UserDb.create( {data: {
+                     name: name,
+                    age :age
+                 }})
         .then (user => {
             res.json(user)
         })
@@ -69,12 +79,19 @@ controller.create = (req, res) => {
 
 controller.update = async (req, res) => {
     let {id,name,age} = req.body
-    
+    console.log("dans update")
     age = parseInt(age)
-  
-    
+    id = parseInt(id)
     if (name.length !=0  && Number.isInteger(age) && age > 0) {
-        const updatedUser = await UserDb.updateOne(id, req.body)
+        console.log("id" + id)
+        const user= await UserDb.findUnique({
+            where: {    id: id
+            }})
+        console.log("user" +user.name + "age" + user.age)
+        const updatedUser = await UserDb.update({
+            where : {id : id},
+            data : {
+                name : name, age : age},})
     }
 }
 
