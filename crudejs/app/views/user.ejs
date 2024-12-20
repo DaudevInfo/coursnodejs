@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+</head>
+<body>
+    <h1>User</h1>
+    <div>
+        
+        <form action="/users/update/<%= user.id %>" method="post">
+            <p>ID: <%= user.id %></p>
+            <p>Name: <input type="text" name="name" value="<%= user.name %>"></p>
+            <p>Age: <input type="number" name="age" value="<%= user.age %>"></p>
+            <button type="submit">Modifier</button>
+        </form>
+        <form action="/users/delete/<%= user.id %>" method="post">
+            <button type="submit">Supprimer</button>
+    </div>
+</body>
+</html>

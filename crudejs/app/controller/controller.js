@@ -4,17 +4,13 @@ const controller = {}
 
 controller.index =  async(req, res) => {
     const {page,limit} = req.query
-    console.log("page" + page + "limit" + limit)
-    console.log("page" + parseInt(limit) + "limit" + parseInt(page))
 
-
-
-    if (parseInt(limit) >0 && parseInt(page) >0) {
-        res.send(await UserDb.findMany({skip : (parseInt(page)-1)*parseInt(limit), take : parseInt(limit)}))
-    } else {  
-        res.send(await UserDb.findMany())
-    }     
+    const users = await UserDb.findMany()
+    res.render("index", {users: users})
+         
  }
+
+
     
 controller.search = async(req, res) => {
     const name = req.params.name
@@ -26,10 +22,8 @@ controller.search = async(req, res) => {
             name: { contains: name }
         }
     });
-    
-    
     console.log("user" + User)
-    res.send(User)
+    res.render("user",User)
 
 }
 
@@ -39,9 +33,9 @@ controller.show = (req, res) => {
     const user= UserDb.findUnique({
         where: {    id: id
         }})
-        .then (user => res.json(user))
-        .catch(err => res.status(404).json({message: "User not found"}))
-
+        .then (user => res.render("user",{user : user}))
+        .catch(err => res.status(404).json({message: "User not found"})
+    )
 }
 
 
@@ -49,6 +43,7 @@ controller.show = (req, res) => {
 
 controller.create = (req, res) => {
     let {name,age} = req.body
+    
     
     age = parseInt(age)
     console.log("nom"+ name)
@@ -77,34 +72,36 @@ controller.create = (req, res) => {
 }
 
 controller.update = async (req, res) => {
-    let {id,name,age} = req.body
+    let {name,age} = req.body
+    let id = req.params.id
+
     console.log("dans update")
     age = parseInt(age)
     id = parseInt(id)
     if (name.length !=0  && Number.isInteger(age) && age > 0) {
         console.log("id" + id)
-        const user= await UserDb.findUnique({
-            where: {    id: id
-            }})
-        console.log("user" +user.name + "age" + user.age)
         const updatedUser = await UserDb.update({
             where : {id : id},
             data : {
                 name : name, age : age},})
-        res.send(updatedUser)
+                const users = await UserDb.findMany()
+                res.render("index", {users: users})
     }
 }
 
  controller.destroy = async(req, res) => {
-    const {id,name,age} = req.body
-    const userExist = UserDb.findById(id).then (user => res.json(user)).catch(err => res.status(404).json({message: "User not found"}))
+   
     
-    if (userExist) {
-        UserDb.deleteOne(id)
-    }
-    else {
-        res.status(404).json({message: "User not found"})
-    }
+    const id =parseInt(req.params.id)
+    console.log("id" +id)
+    const user= UserDb.delete({
+        where: {    id: id
+        }})
+        .then (user => res.json({message: "User deleted"}))
+        .catch(err => res.status(404).json({message: "User not found"})
+    )
+        
+   
 }
 
 module.exports = controller
